@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>แจ้งการลานักศึกษา ปวช.2/2</title>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Tahoma, sans-serif;
+  background: #f1f5f9;
+  margin: 0;
+  padding: 15px;
+  color: #1e293b;
+}
+
+.container {
+  max-width: 750px;
+  margin: auto;
+}
+
+.header {
+  background: #2563eb;
+  color: white;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.header h2 {
+  margin: 0 0 5px;
+}
+
+.card {
+  background: white;
+  margin-top: 15px;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px #0000000d;
+}
+
+.student {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 5px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.student:last-child {
+  border-bottom: none;
+}
+
+.student-name {
+  flex: 1;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+select {
+  padding: 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font-size: 14px;
+  background: white;
+  min-width: 105px;
+}
+
+textarea {
+  width: 100%;
+  min-height: 250px;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-family: Tahoma, sans-serif;
+  font-size: 15px;
+  line-height: 1.8;
+  resize: vertical;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  margin-top: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.copy {
+  background: #16a34a;
+  color: white;
+}
+
+.reset {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+#status {
+  text-align: center;
+  color: #15803d;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+@media(max-width:480px) {
+  body {
+    padding: 9px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .student-name {
+    font-size: 13px;
+  }
+
+  select {
+    min-width: 95px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h2>ระบบแจ้งการลานักศึกษา</h2>
+    <div>ระดับ ปวช.2/2</div>
+  </div>
+
+  <div class="card">
+
+    <h3>เลือกรายชื่อนักศึกษาที่ลา</h3>
+
+    <div id="studentList"></div>
+
+  </div>
+
+  <div class="card">
+
+    <h3>ข้อความสำหรับส่ง LINE</h3>
+
+    <textarea id="message" spellcheck="false"></textarea>
+
+    <button class="copy" onclick="copyMessage()">
+      คัดลอกข้อความ
+    </button>
+
+    <button class="reset" onclick="resetAll()">
+      ล้างรายการที่เลือก
+    </button>
+
+    <div id="status"></div>
+
+  </div>
+
+</div>
+
+<script>
+
+// ==================================
+// รายชื่อนักศึกษา 45 คน
+// แก้ไขชื่อจริงได้ตรงนี้
+// ==================================
+
+const students = [
+  "นายรักชาติ จิตหงษา",
+  "พระจักรกฤษณ์ แซ่หลี",
+  "สามเณรสิทธา แซ่หลี",
+  "สามเณรเจษฎาภรณ์ คะสา",
+  "นายธนัท สารสุข",
+  "นักเรียนคนที่ 06",
+  "นักเรียนคนที่ 07",
+  "นักเรียนคนที่ 08",
+  "นักเรียนคนที่ 09",
+  "นักเรียนคนที่ 10",
+  "นักเรียนคนที่ 11",
+  "นักเรียนคนที่ 12",
+  "นักเรียนคนที่ 13",
+  "นักเรียนคนที่ 14",
+  "นักเรียนคนที่ 15",
+  "นักเรียนคนที่ 16",
+  "นักเรียนคนที่ 17",
+  "นักเรียนคนที่ 18",
+  "นักเรียนคนที่ 19",
+  "นักเรียนคนที่ 20",
+  "นักเรียนคนที่ 21",
+  "นักเรียนคนที่ 22",
+  "นักเรียนคนที่ 23",
+  "นักเรียนคนที่ 24",
+  "นักเรียนคนที่ 25",
+  "นักเรียนคนที่ 26",
+  "นักเรียนคนที่ 27",
+  "นักเรียนคนที่ 28",
+  "นักเรียนคนที่ 29",
+  "นักเรียนคนที่ 30",
+  "นักเรียนคนที่ 31",
+  "นักเรียนคนที่ 32",
+  "นักเรียนคนที่ 33",
+  "นักเรียนคนที่ 34",
+  "นักเรียนคนที่ 35",
+  "นักเรียนคนที่ 36",
+  "นักเรียนคนที่ 37",
+  "นักเรียนคนที่ 38",
+  "นักเรียนคนที่ 39",
+  "นักเรียนคนที่ 40",
+  "นักเรียนคนที่ 41",
+  "นักเรียนคนที่ 42",
+  "นักเรียนคนที่ 43",
+  "นักเรียนคนที่ 44",
+  "นักเรียนคนที่ 45"
+];
+
+// ==================================
+// สร้างรายชื่อนักศึกษา
+// ==================================
+
+function createStudents() {
+
+  const list = document.getElementById("studentList");
+
+  students.forEach(function(name, index) {
+
+    const row = document.createElement("div");
+    row.className = "student";
+
+    const studentName = document.createElement("div");
+    studentName.className = "student-name";
+    studentName.textContent = (index + 1) + ". " + name;
+
+    const select = document.createElement("select");
+
+    select.innerHTML = `
+      <option value="">ไม่ลา</option>
+      <option value="ลาป่วย">ลาป่วย</option>
+      <option value="ลากิจ">ลากิจ</option>
+    `;
+
+    select.dataset.index = index;
+
+    select.addEventListener("change", createMessage);
+
+    row.appendChild(studentName);
+    row.appendChild(select);
+
+    list.appendChild(row);
+
+  });
+
+  createMessage();
+
+}
+
+// ==================================
+// สร้างข้อความอัตโนมัติ
+// ==================================
+
+function createMessage() {
+
+  let message = "";
+
+  message += "ขออนุญาตแจ้งครูผู้สอน\n";
+  message += "นักศึกษาระดับ ปวช.2/2 แจ้งลา\n\n";
+
+  const selects = document.querySelectorAll(
+    "#studentList select"
+  );
+
+  let count = 0;
+
+  selects.forEach(function(select, index) {
+
+    if (select.value !== "") {
+
+      count++;
+
+      message += count + ". " +
+        students[index] + " " +
+        select.value + "\n";
+
+    }
+
+  });
+
+  message += "\nขอบคุณครับ";
+
+  document.getElementById("message").value = message;
+
+}
+
+// ==================================
+// คัดลอกข้อความ
+// ==================================
+
+async function copyMessage() {
+
+  const textarea = document.getElementById("message");
+  const status = document.getElementById("status");
+
+  try {
+
+    await navigator.clipboard.writeText(textarea.value);
+
+    status.textContent =
+      "คัดลอกข้อความเรียบร้อยแล้ว นำไปวางใน LINE ได้เลย";
+
+  } catch (error) {
+
+    textarea.focus();
+    textarea.select();
+
+    const copied = document.execCommand("copy");
+
+    status.textContent = copied
+      ? "คัดลอกข้อความเรียบร้อยแล้ว"
+      : "กรุณากดค้างที่ข้อความเพื่อคัดลอก";
+
+  }
+
+}
+
+// ==================================
+// ล้างรายการทั้งหมด
+// ==================================
+
+function resetAll() {
+
+  const selects = document.querySelectorAll(
+    "#studentList select"
+  );
+
+  selects.forEach(function(select) {
+    select.value = "";
+  });
+
+  document.getElementById("status").textContent = "";
+
+  createMessage();
+
+}
+
+// เริ่มต้นเว็บไซต์
+createStudents();
+
+</script>
+
+</body>
+</html>
