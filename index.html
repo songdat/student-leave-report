@@ -49,7 +49,7 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  padding: 12px 5px;
+  padding: 13px 5px;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -63,13 +63,33 @@ body {
   font-weight: bold;
 }
 
-select {
-  padding: 9px;
-  border: 1px solid #cbd5e1;
-  border-radius: 7px;
+.options {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.check-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   font-size: 14px;
-  background: white;
-  min-width: 105px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.check-option input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.check-option.sick {
+  color: #2563eb;
+}
+
+.check-option.personal {
+  color: #d97706;
 }
 
 textarea {
@@ -121,12 +141,26 @@ button {
     padding: 12px;
   }
 
-  .student-name {
-    font-size: 13px;
+  .student {
+    gap: 5px;
   }
 
-  select {
-    min-width: 95px;
+  .student-name {
+    font-size: 12px;
+  }
+
+  .options {
+    gap: 7px;
+  }
+
+  .check-option {
+    font-size: 12px;
+    gap: 2px;
+  }
+
+  .check-option input {
+    width: 16px;
+    height: 16px;
   }
 }
 </style>
@@ -172,8 +206,7 @@ button {
 <script>
 
 // ==================================
-// รายชื่อนักศึกษา 45 คน
-// แก้ไขชื่อจริงได้ตรงนี้
+// รายชื่อนักศึกษา
 // ==================================
 
 const students = [
@@ -204,7 +237,7 @@ const students = [
   "นางสาวชนันญา พันธุ์เมือง",
   "นางสาวชไมพร ชมภูพระ",
   "นายนราธิป ไชยสุระ",
-  "นายธีรศักดิ์ ทองสิงห์",
+  "นายธีรศักดิ์ ทองสิงห์"
 ];
 
 // ==================================
@@ -224,20 +257,58 @@ function createStudents() {
     studentName.className = "student-name";
     studentName.textContent = (index + 1) + ". " + name;
 
-    const select = document.createElement("select");
+    const options = document.createElement("div");
+    options.className = "options";
 
-    select.innerHTML = `
-      <option value="">ไม่ลา</option>
-      <option value="ลาป่วย">ลาป่วย</option>
-      <option value="ลากิจ">ลากิจ</option>
-    `;
+    // Checkbox ลาป่วย
+    const sickLabel = document.createElement("label");
+    sickLabel.className = "check-option sick";
 
-    select.dataset.index = index;
+    const sick = document.createElement("input");
+    sick.type = "checkbox";
+    sick.value = "ลาป่วย";
+    sick.dataset.index = index;
 
-    select.addEventListener("change", createMessage);
+    sick.addEventListener("change", function() {
+
+      if (sick.checked) {
+        personal.checked = false;
+      }
+
+      createMessage();
+
+    });
+
+    sickLabel.appendChild(sick);
+    sickLabel.appendChild(document.createTextNode("ลาป่วย"));
+
+    // Checkbox ลากิจ
+    const personalLabel = document.createElement("label");
+    personalLabel.className = "check-option personal";
+
+    const personal = document.createElement("input");
+    personal.type = "checkbox";
+    personal.value = "ลากิจ";
+    personal.dataset.index = index;
+
+    personal.addEventListener("change", function() {
+
+      if (personal.checked) {
+        sick.checked = false;
+      }
+
+      createMessage();
+
+    });
+
+    personalLabel.appendChild(personal);
+    personalLabel.appendChild(document.createTextNode("ลากิจ"));
+
+    options.appendChild(sickLabel);
+    options.appendChild(personalLabel);
 
     row.appendChild(studentName);
-    row.appendChild(select);
+    row.appendChild(options);
 
     list.appendChild(row);
 
@@ -258,23 +329,29 @@ function createMessage() {
   message += "ขออนุญาตแจ้งครูผู้สอน\n";
   message += "นักศึกษาระดับ ปวช.2/2 แจ้งลา\n\n";
 
-  const selects = document.querySelectorAll(
-    "#studentList select"
-  );
+  const rows = document.querySelectorAll(".student");
 
   let count = 0;
 
-  selects.forEach(function(select, index) {
+  rows.forEach(function(row, index) {
 
-    if (select.value !== "") {
+    const checkboxes = row.querySelectorAll(
+      'input[type="checkbox"]'
+    );
 
-      count++;
+    checkboxes.forEach(function(checkbox) {
 
-      message += count + ". " +
-        students[index] + " " +
-        select.value + "\n";
+      if (checkbox.checked) {
 
-    }
+        count++;
+
+        message += count + ". " +
+          students[index] + " " +
+          checkbox.value + "\n";
+
+      }
+
+    });
 
   });
 
@@ -321,12 +398,12 @@ async function copyMessage() {
 
 function resetAll() {
 
-  const selects = document.querySelectorAll(
-    "#studentList select"
+  const checkboxes = document.querySelectorAll(
+    '#studentList input[type="checkbox"]'
   );
 
-  selects.forEach(function(select) {
-    select.value = "";
+  checkboxes.forEach(function(checkbox) {
+    checkbox.checked = false;
   });
 
   document.getElementById("status").textContent = "";
